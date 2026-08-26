@@ -44,11 +44,11 @@ def build_reply_menu() -> ReplyKeyboardMarkup:
 
 
 def build_subscribe_keyboard(material_key: str) -> InlineKeyboardMarkup:
-    """Клавиатура: ссылка на канал + кнопка 'Я подписался' для повторной проверки."""
+    """Клавиатура: ссылка на канал + кнопка повторной проверки."""
     return InlineKeyboardMarkup(
         inline_keyboard=[
-            [InlineKeyboardButton(text="🔔 Подписаться на канал", url=CHANNEL_URL)],
-            [InlineKeyboardButton(text="✅ Я подписался", callback_data=f"get:{material_key}")],
+            [InlineKeyboardButton(text="подписаться на канал", url=CHANNEL_URL)],
+            [InlineKeyboardButton(text="я подписался", callback_data=f"get:{material_key}")],
         ]
     )
 
@@ -118,7 +118,7 @@ async def handle_material_request(callback: CallbackQuery):
         await callback.answer("Нужно подписаться на канал 🙂", show_alert=True)
         await callback.message.answer(
             "Похоже, ты ещё не подписан(а) на канал.\n"
-            "Подпишись и нажми «Я подписался» — материал придёт сразу после проверки.",
+            "Подпишись и нажми «я подписался» — материал придёт сразу после проверки.",
             reply_markup=build_subscribe_keyboard(material_key),
         )
 
@@ -138,7 +138,7 @@ async def handle_material_text(message: Message):
     else:
         await message.answer(
             "Похоже, ты ещё не подписан(а) на канал.\n"
-            "Подпишись и нажми «Я подписался» — материал придёт сразу после проверки.",
+            "Подпишись и нажми «я подписался» — материал придёт сразу после проверки.",
             reply_markup=build_subscribe_keyboard(material_key),
         )
 
