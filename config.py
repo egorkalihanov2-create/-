@@ -10,39 +10,39 @@ CHANNEL_URL = os.environ.get("CHANNEL_URL", "https://t.me/my_channel")  # ссы
 MATERIALS = {
     "awards_calendar": {
         "button_text": "календарь премий",
-        "content": "Календарь премий: https://t.me/c/3657884848/433",
+        "content": "Календарь премий: https://t.me/novaya_nasmotrennost/6285",
     },
     "tgk_guide": {
         "button_text": "гид по тгк",
-        "content": "Гид по тгк: https://t.me/c/3657884848/435",
+        "content": "Гид по тгк: https://t.me/novaya_nasmotrennost/5671",
     },
     "designer_resources": {
         "button_text": "ресурсы для дизайнеров",
         "content": "Ресурсы для дизайнеров: https://t.me/c/3657884848/436",
     },
     "hh_hse": {
-        "button_text": "HH x HSE",
-        "content": "HH x HSE: https://t.me/c/3657884848/439",
+        "button_text": "как тгк может помочь на карьерном пути",
+        "content": "Как тгк может помочь на карьерном пути: https://t.me/novaya_nasmotrennost/4226",
     },
     "week_3d": {
-        "button_text": "неделя 3д",
-        "content": "Неделя 3д: https://t.me/c/3657884848/443",
+        "button_text": "неделя 3D",
+        "content": "Неделя 3D: https://t.me/novaya_nasmotrennost/5392",
     },
     "zine_week": {
         "button_text": "неделя зинов",
-        "content": "Неделя зинов: https://t.me/c/3657884848/444",
+        "content": "Неделя зинов: https://t.me/novaya_nasmotrennost/4291",
     },
     "typography_week": {
         "button_text": "неделя типографики",
-        "content": "Неделя типографики: https://t.me/c/3657884848/445",
+        "content": "Неделя типографики: https://t.me/novaya_nasmotrennost/4472",
     },
     "archive_week": {
-        "button_text": "неделя архивов",
-        "content": "Неделя архивов: https://t.me/c/3657884848/446",
+        "button_text": "неделя книги",
+        "content": "Неделя книги: https://t.me/novaya_nasmotrennost/4936",
     },
     "nn_presentation": {
-        "button_text": "НН преза PDF",
-        "content": "НН преза",
+        "button_text": "как не закопать талант в кризис",
+        "content": "Как не закопать талант в кризис",
         "file_path": "assets/nn_presentation.pdf",
     },
 }

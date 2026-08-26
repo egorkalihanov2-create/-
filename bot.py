@@ -8,7 +8,9 @@ from aiogram.types import (
     FSInputFile,
     InlineKeyboardButton,
     InlineKeyboardMarkup,
+    KeyboardButton,
     Message,
+    ReplyKeyboardMarkup,
 )
 
 from config import BOT_TOKEN, CHANNEL_ID, CHANNEL_URL, MATERIALS
@@ -21,13 +23,24 @@ dp = Dispatcher()
 
 
 def build_main_menu() -> InlineKeyboardMarkup:
-    """Клавиатура с материалами (по 2 кнопки в ряд)."""
+    """Inline-клавиатура с материалами (по 2 кнопки в ряд)."""
     buttons = [
         InlineKeyboardButton(text=item["button_text"], callback_data=f"get:{key}")
         for key, item in MATERIALS.items()
     ]
     rows = [buttons[i : i + 2] for i in range(0, len(buttons), 2)]
     return InlineKeyboardMarkup(inline_keyboard=rows)
+
+
+def build_reply_menu() -> ReplyKeyboardMarkup:
+    """Обычная клавиатура с материалами под полем ввода."""
+    buttons = [KeyboardButton(text=item["button_text"]) for item in MATERIALS.values()]
+    rows = [buttons[i : i + 2] for i in range(0, len(buttons), 2)]
+    return ReplyKeyboardMarkup(
+        keyboard=rows,
+        resize_keyboard=True,
+        input_field_placeholder="выбери материал",
+    )
 
 
 def build_subscribe_keyboard(material_key: str) -> InlineKeyboardMarkup:
@@ -51,11 +64,24 @@ async def is_subscribed(user_id: int) -> bool:
         return False
 
 
+async def send_material(message: Message, material: dict):
+    if file_path := material.get("file_path"):
+        await message.answer_document(
+            FSInputFile(file_path),
+            caption=material.get("content"),
+            reply_markup=build_reply_menu(),
+        )
+    else:
+        await message.answer(material["content"], reply_markup=build_reply_menu())
+
+
 @dp.message(CommandStart())
 async def cmd_start(message: Message):
     await message.answer(
-        "Привет! Выбери материал ниже 👇\n"
-        "Чтобы получить его, нужно быть подписанным на наш канал.",
+        "привет! 👀\n\n"
+        "это бот от @novaya_nasmotrennost – здесь будем делиться полезными "
+        "для дизайнеров и недизайнеров материалами\n\n"
+        "в наличии ↓",
         reply_markup=build_main_menu(),
     )
 
@@ -73,16 +99,30 @@ async def handle_material_request(callback: CallbackQuery):
 
     if subscribed:
         await callback.answer()  # закрыть "часики" на кнопке
-        if file_path := material.get("file_path"):
-            await callback.message.answer_document(
-                FSInputFile(file_path),
-                caption=material.get("content"),
-            )
-        else:
-            await callback.message.answer(material["content"])
+        await send_material(callback.message, material)
     else:
         await callback.answer("Нужно подписаться на канал 🙂", show_alert=True)
         await callback.message.answer(
+            "Похоже, ты ещё не подписан(а) на канал.\n"
+            "Подпишись и нажми «Я подписался» — материал придёт сразу после проверки.",
+            reply_markup=build_subscribe_keyboard(material_key),
+        )
+
+
+@dp.message(F.text.in_([item["button_text"] for item in MATERIALS.values()]))
+async def handle_material_text(message: Message):
+    material_key, material = next(
+        (key, item)
+        for key, item in MATERIALS.items()
+        if item["button_text"] == message.text
+    )
+
+    subscribed = await is_subscribed(message.from_user.id)
+
+    if subscribed:
+        await send_material(message, material)
+    else:
+        await message.answer(
             "Похоже, ты ещё не подписан(а) на канал.\n"
             "Подпишись и нажми «Я подписался» — материал придёт сразу после проверки.",
             reply_markup=build_subscribe_keyboard(material_key),
