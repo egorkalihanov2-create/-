@@ -65,6 +65,20 @@ async def is_subscribed(user_id: int) -> bool:
 
 
 async def send_material(message: Message, material: dict):
+    if message_id := material.get("message_id"):
+        try:
+            await bot.forward_message(
+                chat_id=message.chat.id,
+                from_chat_id=CHANNEL_ID,
+                message_id=message_id,
+            )
+            await message.answer("выбирай дальше ↓", reply_markup=build_reply_menu())
+            return
+        except Exception as e:
+            logger.error(
+                f"Ошибка пересылки message_id={message_id} из {CHANNEL_ID}: {e}"
+            )
+
     if file_path := material.get("file_path"):
         await message.answer_document(
             FSInputFile(file_path),
