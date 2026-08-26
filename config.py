@@ -20,8 +20,8 @@ MATERIALS = {
     },
     "designer_resources": {
         "button_text": "ресурсы для дизайнеров",
-        "content": "Ресурсы для дизайнеров: https://t.me/c/3657884848/436",
-        "message_id": 436,
+        "content": "Ресурсы для дизайнеров: https://t.me/novaya_nasmotrennost/5642",
+        "message_id": 5642,
     },
     "hh_hse": {
         "button_text": "как тгк может помочь на карьерном пути",
@@ -49,8 +49,13 @@ MATERIALS = {
         "message_id": 4936,
     },
     "nn_presentation": {
-        "button_text": "как не закопать талант в кризис",
-        "content": "Как не закопать талант в кризис",
+        "button_text": "как не закопать талант в кризис ч.1",
+        "content": "Как не закопать талант в кризис ч.1",
         "file_path": "assets/nn_presentation.pdf",
+    },
+    "talent_crisis_part_2": {
+        "button_text": "как не закопать талант в кризис ч.2",
+        "content": "Как не закопать талант в кризис ч.2: https://t.me/novaya_nasmotrennost/6562",
+        "message_id": 6562,
     },
 }
