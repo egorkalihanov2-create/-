@@ -5,6 +5,7 @@ from aiogram import Bot, Dispatcher, F
 from aiogram.filters import CommandStart
 from aiogram.types import (
     CallbackQuery,
+    FSInputFile,
     InlineKeyboardButton,
     InlineKeyboardMarkup,
     Message,
@@ -72,7 +73,13 @@ async def handle_material_request(callback: CallbackQuery):
 
     if subscribed:
         await callback.answer()  # закрыть "часики" на кнопке
-        await callback.message.answer(material["content"])
+        if file_path := material.get("file_path"):
+            await callback.message.answer_document(
+                FSInputFile(file_path),
+                caption=material.get("content"),
+            )
+        else:
+            await callback.message.answer(material["content"])
     else:
         await callback.answer("Нужно подписаться на канал 🙂", show_alert=True)
         await callback.message.answer(

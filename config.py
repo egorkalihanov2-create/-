@@ -40,4 +40,9 @@ MATERIALS = {
         "button_text": "неделя архивов",
         "content": "Неделя архивов: https://t.me/c/3657884848/446",
     },
+    "nn_presentation": {
+        "button_text": "НН преза PDF",
+        "content": "НН преза",
+        "file_path": "assets/nn_presentation.pdf",
+    },
 }
