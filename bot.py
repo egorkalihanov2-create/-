@@ -34,6 +34,7 @@ WELCOME_TEXT = (
     "для дизайнеров и недизайнеров материалами\n\n"
     "в наличии ↓"
 )
+MENU_SWITCH_TEXT = "\u2060"
 
 
 def build_main_menu() -> InlineKeyboardMarkup:
@@ -145,6 +146,22 @@ async def send_material(
         await message.answer(text, reply_markup=reply_markup)
 
 
+async def delete_button_press(message: Message):
+    try:
+        await message.delete()
+    except Exception as e:
+        logger.info(f"Не удалось удалить служебное сообщение с кнопки: {e}")
+
+
+async def switch_reply_menu(message: Message, reply_markup: ReplyKeyboardMarkup):
+    await delete_button_press(message)
+    try:
+        menu_message = await message.answer(MENU_SWITCH_TEXT, reply_markup=reply_markup)
+        await menu_message.delete()
+    except Exception as e:
+        logger.error(f"Не удалось тихо переключить нижнюю клавиатуру: {e}")
+
+
 @dp.message(CommandStart())
 async def cmd_start(message: Message):
     await message.answer(WELCOME_TEXT, reply_markup=build_main_menu())
@@ -188,9 +205,10 @@ async def handle_material_request(callback: CallbackQuery):
 @dp.message(F.text.in_(["гайд по тгк", "антикризис"]))
 async def handle_reply_menu(message: Message):
     if message.text == "гайд по тгк":
-        await message.answer("гайд по тгк ↓", reply_markup=build_guide_reply_menu())
+        await switch_reply_menu(message, build_guide_reply_menu())
         return
 
+    await delete_button_press(message)
     material_key = ANTICRISIS_KEY
     material = MATERIALS[material_key]
 
@@ -208,11 +226,12 @@ async def handle_reply_menu(message: Message):
 
 @dp.message(F.text == "назад")
 async def handle_reply_back(message: Message):
-    await message.answer(WELCOME_TEXT, reply_markup=build_reply_menu())
+    await switch_reply_menu(message, build_reply_menu())
 
 
 @dp.message(F.text.in_([MATERIALS[key]["button_text"] for key in GUIDE_MATERIAL_KEYS]))
 async def handle_guide_reply_material(message: Message):
+    await delete_button_press(message)
     material_key = get_material_key_by_button_text(message.text)
     if material_key is None:
         await message.answer("Материал не найден.", reply_markup=build_guide_reply_menu())
