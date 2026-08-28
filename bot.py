@@ -72,6 +72,18 @@ def build_reply_menu() -> ReplyKeyboardMarkup:
     )
 
 
+def build_guide_reply_menu() -> ReplyKeyboardMarkup:
+    """Обычная клавиатура второго шага под полем ввода."""
+    buttons = [KeyboardButton(text=MATERIALS[key]["button_text"]) for key in GUIDE_MATERIAL_KEYS]
+    rows = [buttons[i : i + 2] for i in range(0, len(buttons), 2)]
+    rows.append([KeyboardButton(text="назад")])
+    return ReplyKeyboardMarkup(
+        keyboard=rows,
+        resize_keyboard=True,
+        input_field_placeholder="выбери материал",
+    )
+
+
 def build_subscribe_keyboard(material_key: str) -> InlineKeyboardMarkup:
     """Клавиатура: ссылка на канал + кнопка повторной проверки."""
     return InlineKeyboardMarkup(
@@ -93,7 +105,19 @@ async def is_subscribed(user_id: int) -> bool:
         return False
 
 
-async def send_material(message: Message, material: dict):
+def get_material_key_by_button_text(button_text: str) -> str | None:
+    for key in GUIDE_MATERIAL_KEYS:
+        if MATERIALS[key]["button_text"] == button_text:
+            return key
+    return None
+
+
+async def send_material(
+    message: Message,
+    material: dict,
+    reply_markup: ReplyKeyboardMarkup | None = None,
+):
+    reply_markup = reply_markup or build_reply_menu()
     forwarded = False
 
     if message_id := material.get("message_id"):
@@ -113,12 +137,12 @@ async def send_material(message: Message, material: dict):
     if file_path := material.get("file_path"):
         await message.answer_document(
             FSInputFile(file_path),
-            caption=material.get("content"),
-            reply_markup=build_reply_menu(),
+            caption=material.get("file_caption"),
+            reply_markup=reply_markup,
         )
     else:
         text = "выбирай дальше ↓" if forwarded else material["content"]
-        await message.answer(text, reply_markup=build_reply_menu())
+        await message.answer(text, reply_markup=reply_markup)
 
 
 @dp.message(CommandStart())
@@ -164,7 +188,7 @@ async def handle_material_request(callback: CallbackQuery):
 @dp.message(F.text.in_(["гайд по тгк", "антикризис"]))
 async def handle_reply_menu(message: Message):
     if message.text == "гайд по тгк":
-        await message.answer("гайд по тгк ↓", reply_markup=build_guide_menu())
+        await message.answer("гайд по тгк ↓", reply_markup=build_guide_reply_menu())
         return
 
     material_key = ANTICRISIS_KEY
@@ -174,6 +198,31 @@ async def handle_reply_menu(message: Message):
 
     if subscribed:
         await send_material(message, material)
+    else:
+        await message.answer(
+            "Похоже, ты ещё не подписан(а) на канал.\n"
+            "Подпишись и нажми «я подписался» — материал придёт сразу после проверки.",
+            reply_markup=build_subscribe_keyboard(material_key),
+        )
+
+
+@dp.message(F.text == "назад")
+async def handle_reply_back(message: Message):
+    await message.answer(WELCOME_TEXT, reply_markup=build_reply_menu())
+
+
+@dp.message(F.text.in_([MATERIALS[key]["button_text"] for key in GUIDE_MATERIAL_KEYS]))
+async def handle_guide_reply_material(message: Message):
+    material_key = get_material_key_by_button_text(message.text)
+    if material_key is None:
+        await message.answer("Материал не найден.", reply_markup=build_guide_reply_menu())
+        return
+
+    material = MATERIALS[material_key]
+    subscribed = await is_subscribed(message.from_user.id)
+
+    if subscribed:
+        await send_material(message, material, reply_markup=build_guide_reply_menu())
     else:
         await message.answer(
             "Похоже, ты ещё не подписан(а) на канал.\n"
