@@ -56,9 +56,8 @@ MATERIALS = {
     },
     "anticrisis": {
         "button_text": "антикризис",
-        "content": "Антикризис: https://t.me/bkvchallenge/1221",
-        "from_chat_id": -1002195708632,
-        "message_id": 1221,
+        "content": "Антикризис: https://t.me/novaya_nasmotrennost/6562",
+        "message_id": 6562,
         "file_path": "assets/nn_presentation.pdf",
     },
 }
