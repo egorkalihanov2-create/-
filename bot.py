@@ -13,7 +13,14 @@ from aiogram.types import (
     ReplyKeyboardMarkup,
 )
 
-from config import BOT_TOKEN, CHANNEL_ID, CHANNEL_URL, MATERIALS
+from config import (
+    ANTICRISIS_KEY,
+    BOT_TOKEN,
+    CHANNEL_ID,
+    CHANNEL_URL,
+    GUIDE_MATERIAL_KEYS,
+    MATERIALS,
+)
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -21,21 +28,43 @@ logger = logging.getLogger(__name__)
 bot = Bot(token=BOT_TOKEN)
 dp = Dispatcher()
 
+WELCOME_TEXT = (
+    "привет! 👀\n\n"
+    "это бот от @novaya_nasmotrennost – здесь будем делиться полезными "
+    "для дизайнеров и недизайнеров материалами\n\n"
+    "в наличии ↓"
+)
+
 
 def build_main_menu() -> InlineKeyboardMarkup:
-    """Inline-клавиатура с материалами (по 2 кнопки в ряд)."""
+    """Первый шаг: выбор раздела."""
+    return InlineKeyboardMarkup(
+        inline_keyboard=[
+            [
+                InlineKeyboardButton(text="гайд по тгк", callback_data="menu:guide"),
+                InlineKeyboardButton(text="антикризис", callback_data=f"get:{ANTICRISIS_KEY}"),
+            ]
+        ]
+    )
+
+
+def build_guide_menu() -> InlineKeyboardMarkup:
+    """Второй шаг: материалы гайда по тгк."""
     buttons = [
-        InlineKeyboardButton(text=item["button_text"], callback_data=f"get:{key}")
-        for key, item in MATERIALS.items()
+        InlineKeyboardButton(
+            text=MATERIALS[key]["button_text"],
+            callback_data=f"get:{key}",
+        )
+        for key in GUIDE_MATERIAL_KEYS
     ]
     rows = [buttons[i : i + 2] for i in range(0, len(buttons), 2)]
+    rows.append([InlineKeyboardButton(text="назад", callback_data="menu:main")])
     return InlineKeyboardMarkup(inline_keyboard=rows)
 
 
 def build_reply_menu() -> ReplyKeyboardMarkup:
-    """Обычная клавиатура с материалами под полем ввода."""
-    buttons = [KeyboardButton(text=item["button_text"]) for item in MATERIALS.values()]
-    rows = [buttons[i : i + 2] for i in range(0, len(buttons), 2)]
+    """Обычная клавиатура с разделами под полем ввода."""
+    rows = [[KeyboardButton(text="гайд по тгк"), KeyboardButton(text="антикризис")]]
     return ReplyKeyboardMarkup(
         keyboard=rows,
         resize_keyboard=True,
@@ -65,18 +94,20 @@ async def is_subscribed(user_id: int) -> bool:
 
 
 async def send_material(message: Message, material: dict):
+    forwarded = False
+
     if message_id := material.get("message_id"):
+        from_chat_id = material.get("from_chat_id", CHANNEL_ID)
         try:
             await bot.forward_message(
                 chat_id=message.chat.id,
-                from_chat_id=CHANNEL_ID,
+                from_chat_id=from_chat_id,
                 message_id=message_id,
             )
-            await message.answer("выбирай дальше ↓", reply_markup=build_reply_menu())
-            return
+            forwarded = True
         except Exception as e:
             logger.error(
-                f"Ошибка пересылки message_id={message_id} из {CHANNEL_ID}: {e}"
+                f"Ошибка пересылки message_id={message_id} из {from_chat_id}: {e}"
             )
 
     if file_path := material.get("file_path"):
@@ -86,18 +117,25 @@ async def send_material(message: Message, material: dict):
             reply_markup=build_reply_menu(),
         )
     else:
-        await message.answer(material["content"], reply_markup=build_reply_menu())
+        text = "выбирай дальше ↓" if forwarded else material["content"]
+        await message.answer(text, reply_markup=build_reply_menu())
 
 
 @dp.message(CommandStart())
 async def cmd_start(message: Message):
-    await message.answer(
-        "привет! 👀\n\n"
-        "это бот от @novaya_nasmotrennost – здесь будем делиться полезными "
-        "для дизайнеров и недизайнеров материалами\n\n"
-        "в наличии ↓",
-        reply_markup=build_main_menu(),
-    )
+    await message.answer(WELCOME_TEXT, reply_markup=build_main_menu())
+
+
+@dp.callback_query(F.data == "menu:main")
+async def handle_main_menu(callback: CallbackQuery):
+    await callback.answer()
+    await callback.message.edit_text(WELCOME_TEXT, reply_markup=build_main_menu())
+
+
+@dp.callback_query(F.data == "menu:guide")
+async def handle_guide_menu(callback: CallbackQuery):
+    await callback.answer()
+    await callback.message.edit_text("гайд по тгк ↓", reply_markup=build_guide_menu())
 
 
 @dp.callback_query(F.data.startswith("get:"))
@@ -123,13 +161,14 @@ async def handle_material_request(callback: CallbackQuery):
         )
 
 
-@dp.message(F.text.in_([item["button_text"] for item in MATERIALS.values()]))
-async def handle_material_text(message: Message):
-    material_key, material = next(
-        (key, item)
-        for key, item in MATERIALS.items()
-        if item["button_text"] == message.text
-    )
+@dp.message(F.text.in_(["гайд по тгк", "антикризис"]))
+async def handle_reply_menu(message: Message):
+    if message.text == "гайд по тгк":
+        await message.answer("гайд по тгк ↓", reply_markup=build_guide_menu())
+        return
+
+    material_key = ANTICRISIS_KEY
+    material = MATERIALS[material_key]
 
     subscribed = await is_subscribed(message.from_user.id)
 

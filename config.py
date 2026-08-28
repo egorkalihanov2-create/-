@@ -7,16 +7,22 @@ CHANNEL_URL = os.environ.get("CHANNEL_URL", "https://t.me/my_channel")  # ссы
 
 # --- Материалы, которые бот выдаёт после проверки подписки ---
 # id -> настройки материала: кнопка, fallback-текст/ссылка, id поста или файл
+GUIDE_MATERIAL_KEYS = [
+    "awards_calendar",
+    "designer_resources",
+    "week_3d",
+    "zine_week",
+    "typography_week",
+    "book_week",
+]
+
+ANTICRISIS_KEY = "anticrisis"
+
 MATERIALS = {
     "awards_calendar": {
         "button_text": "календарь премий",
         "content": "Календарь премий: https://t.me/novaya_nasmotrennost/6285",
         "message_id": 6285,
-    },
-    "tgk_guide": {
-        "button_text": "гид по тгк",
-        "content": "Гид по тгк: https://t.me/novaya_nasmotrennost/5671",
-        "message_id": 5671,
     },
     "designer_resources": {
         "button_text": "ресурсы для дизайнеров",
@@ -43,19 +49,16 @@ MATERIALS = {
         "content": "Неделя типографики: https://t.me/novaya_nasmotrennost/4472",
         "message_id": 4472,
     },
-    "archive_week": {
+    "book_week": {
         "button_text": "неделя книги",
         "content": "Неделя книги: https://t.me/novaya_nasmotrennost/4936",
         "message_id": 4936,
     },
-    "nn_presentation": {
-        "button_text": "как не закопать талант в кризис ч.1",
-        "content": "Как не закопать талант в кризис ч.1",
+    "anticrisis": {
+        "button_text": "антикризис",
+        "content": "Антикризис: https://t.me/bkvchallenge/1221",
+        "from_chat_id": "@bkvchallenge",
+        "message_id": 1221,
         "file_path": "assets/nn_presentation.pdf",
-    },
-    "talent_crisis_part_2": {
-        "button_text": "как не закопать талант в кризис ч.2",
-        "content": "Как не закопать талант в кризис ч.2: https://t.me/novaya_nasmotrennost/6562",
-        "message_id": 6562,
     },
 }
