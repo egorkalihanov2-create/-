@@ -8,6 +8,8 @@ CHANNEL_URL = os.environ.get("CHANNEL_URL", "https://t.me/my_channel")  # ссы
 # --- Материалы, которые бот выдаёт после проверки подписки ---
 # id -> настройки материала: кнопка, fallback-текст/ссылка, id поста или файл
 GUIDE_MATERIAL_KEYS = [
+    "tgk_guide",
+    "tgk_career",
     "awards_calendar",
     "designer_resources",
     "week_3d",
@@ -19,6 +21,16 @@ GUIDE_MATERIAL_KEYS = [
 ANTICRISIS_KEY = "anticrisis"
 
 MATERIALS = {
+    "tgk_guide": {
+        "button_text": "гид по тгк",
+        "content": "Гид по тгк: https://t.me/novaya_nasmotrennost/5671",
+        "message_id": 5671,
+    },
+    "tgk_career": {
+        "button_text": "тгк + карьера",
+        "content": "ТГК + карьера: https://t.me/novaya_nasmotrennost/4226",
+        "message_id": 4226,
+    },
     "awards_calendar": {
         "button_text": "календарь премий",
         "content": "Календарь премий: https://t.me/novaya_nasmotrennost/6285",
@@ -28,11 +40,6 @@ MATERIALS = {
         "button_text": "ресурсы для дизайнеров",
         "content": "Ресурсы для дизайнеров: https://t.me/novaya_nasmotrennost/5642",
         "message_id": 5642,
-    },
-    "hh_hse": {
-        "button_text": "как тгк может помочь на карьерном пути",
-        "content": "Как тгк может помочь на карьерном пути: https://t.me/novaya_nasmotrennost/4226",
-        "message_id": 4226,
     },
     "week_3d": {
         "button_text": "неделя 3D",
